@@ -5,7 +5,7 @@ import {
   ScrollRestoration,
 } from "react-router-dom";
 import { useEffect } from "react";
-import { Home, NotFound } from "./pages";
+import { Home, NotFound, PuzzlePage } from "./pages";
 
 import { Scroll } from "./animation";
 
@@ -31,7 +31,10 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-
+      {
+        path: "puzzle",
+        element: <PuzzlePage />,
+      },
       {
         path: "*",
         element: <NotFound />,
