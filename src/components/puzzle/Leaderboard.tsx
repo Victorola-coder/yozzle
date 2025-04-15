@@ -23,7 +23,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
   // Load scores from localStorage on component mount
   useEffect(() => {
-    const savedScores = localStorage.getItem("puzzleScores");
+    const savedScores = localStorage.getItem("yozzleScores");
     if (savedScores) {
       try {
         setScores(JSON.parse(savedScores));
@@ -58,7 +58,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
     setScores(updatedScores);
 
     // Save to localStorage
-    localStorage.setItem("puzzleScores", JSON.stringify(updatedScores));
+    localStorage.setItem("yozzleScores", JSON.stringify(updatedScores));
 
     // Reset form
     setPlayerName("");
@@ -72,7 +72,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
+      <h2 className="text-2xl font-bold mb-4">Yozzle Leaderboard</h2>
 
       {isSubmitting && currentScore && (
         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
@@ -152,7 +152,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
           </table>
         </div>
       ) : (
-        <p className="text-gray-500 italic">No scores yet. Be the first!</p>
+        <p className="text-gray-500 italic">No scores yet. Be the first to complete a Yozzle!</p>
       )}
     </div>
   );

@@ -72,7 +72,7 @@ const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Puzzle Configuration</h2>
+      <h2 className="text-xl font-bold mb-4">Yozzle Configuration</h2>
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">

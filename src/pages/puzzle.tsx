@@ -1,9 +1,9 @@
 import { SEO } from "../components/global";
-import { PuzzleGame, PuzzleConfig, Leaderboard } from "../components/puzzle";
+import { YozzleGame, YozzleConfig, Leaderboard } from "../components/yozzle";
 import { useState, useEffect } from "react";
 import type { Score } from "../components/puzzle/PuzzleGame";
 
-export default function PuzzlePage() {
+export default function YozzlePage() {
   const [puzzleConfig, setPuzzleConfig] = useState({
     rows: 3,
     columns: 3,
@@ -68,10 +68,10 @@ export default function PuzzlePage() {
 
   return (
     <>
-      <SEO title="Image Puzzle Challenge" />
+      <SEO title="Yozzle - Image Puzzle Challenge" />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Image Puzzle Challenge</h1>
+          <h1 className="text-3xl font-bold">Yozzle Challenge</h1>
           <div className="flex gap-2">
             <button
               onClick={toggleLeaderboard}
@@ -83,7 +83,7 @@ export default function PuzzlePage() {
               onClick={() => setShowConfig(!showConfig)}
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
             >
-              {showConfig ? "Hide Settings" : "Configure Puzzle"}
+              {showConfig ? "Hide Settings" : "Configure Yozzle"}
             </button>
           </div>
         </div>
@@ -93,14 +93,14 @@ export default function PuzzlePage() {
             className={`${showLeaderboard ? "lg:col-span-2" : "lg:col-span-3"}`}
           >
             {showConfig ? (
-              <PuzzleConfig
+              <YozzleConfig
                 onConfigChange={handleConfigChange}
                 defaultRows={puzzleConfig.rows}
                 defaultColumns={puzzleConfig.columns}
                 defaultImageSrc={puzzleConfig.imageSrc}
               />
             ) : (
-              <PuzzleGame
+              <YozzleGame
                 key={gameKey}
                 imageSrc={puzzleConfig.imageSrc}
                 rows={puzzleConfig.rows}

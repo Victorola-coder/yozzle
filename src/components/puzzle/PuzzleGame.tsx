@@ -346,7 +346,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
             <div className="p-2 bg-white rounded-md">
               <img
                 src={imageSrc}
-                alt="Complete puzzle"
+                alt="Complete Yozzle"
                 style={{
                   maxWidth: `${columns * firstPiece.width}px`,
                   maxHeight: `${rows * firstPiece.height}px`,
@@ -405,7 +405,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                 // If we have a data URL, use it
                 <img
                   src={piece.img}
-                  alt={`Puzzle piece ${piece.id}`}
+                  alt={`Yozzle piece ${piece.id}`}
                   className="w-full h-full object-cover"
                   style={{
                     width: `${piece.width}px`,
@@ -438,7 +438,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
   const renderInstructions = () => {
     return (
       <div className="bg-white p-4 rounded-lg shadow-md mb-4 max-w-2xl mx-auto text-left">
-        <h3 className="text-xl font-bold mb-2">How to Play</h3>
+        <h3 className="text-xl font-bold mb-2">How to Play Yozzle</h3>
         <ol className="list-decimal pl-5 space-y-2">
           <li>
             The image is split into {rows}x{columns} pieces and shuffled
@@ -454,7 +454,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
           </li>
           <li>
             A timer starts when the game begins - the faster you solve the
-            puzzle, the higher your score!
+            Yozzle, the higher your score!
           </li>
           <li>
             <strong>Peek button:</strong> Use it to briefly see the complete
@@ -462,14 +462,14 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
             your score calculation.
           </li>
           <li>
-            When you complete the puzzle, you can submit your score to the
+            When you complete the Yozzle, you can submit your score to the
             leaderboard.
           </li>
         </ol>
         <div className="mt-4 pt-2 border-t border-gray-200">
           <h4 className="font-bold">Scoring</h4>
           <p>
-            Your score is calculated based on how quickly you solve the puzzle:
+            Your score is calculated based on how quickly you solve the Yozzle:
           </p>
           <ul className="list-disc pl-5">
             <li>Base score: 1000 points</li>
@@ -490,7 +490,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
 
       {!gameStarted ? (
         <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Image Puzzle Challenge</h1>
+          <h1 className="text-3xl font-bold mb-4">Yozzle Challenge</h1>
           <p className="mb-4">
             Rearrange the pieces to complete the image. The faster you solve,
             the more points you get!
@@ -500,7 +500,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
             className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors"
             disabled={!imageLoaded}
           >
-            {imageLoaded ? "Start Game" : "Loading Image..."}
+            {imageLoaded ? "Start Yozzle" : "Loading Image..."}
           </button>
           <div className="mt-2">
             <button
@@ -556,7 +556,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
           {isComplete ? (
             <div className="text-center mt-4">
               <h2 className="text-2xl font-bold text-green-600 mb-2">
-                Puzzle Complete!
+                Yozzle Complete!
               </h2>
               <p className="text-lg mb-4">
                 You solved it in {elapsedTime} seconds.
