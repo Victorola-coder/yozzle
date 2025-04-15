@@ -42,9 +42,14 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(
     null
   );
+  const [showInstructions, setShowInstructions] = useState(false);
   const timerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Fixed dimensions for puzzle
+  const PUZZLE_MAX_WIDTH = 600;
+  const PUZZLE_MAX_HEIGHT = 500;
 
   // Load and process the image
   useEffect(() => {
@@ -65,12 +70,26 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+        // Calculate aspect ratio and resize while maintaining it
+        let newWidth = img.width;
+        let newHeight = img.height;
 
-        const pieceWidth = Math.floor(img.width / columns);
-        const pieceHeight = Math.floor(img.height / rows);
+        // Scale down if image is larger than max dimensions
+        if (newWidth > PUZZLE_MAX_WIDTH || newHeight > PUZZLE_MAX_HEIGHT) {
+          const widthRatio = PUZZLE_MAX_WIDTH / newWidth;
+          const heightRatio = PUZZLE_MAX_HEIGHT / newHeight;
+          const scaleFactor = Math.min(widthRatio, heightRatio);
+
+          newWidth = Math.floor(newWidth * scaleFactor);
+          newHeight = Math.floor(newHeight * scaleFactor);
+        }
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+        const pieceWidth = Math.floor(newWidth / columns);
+        const pieceHeight = Math.floor(newHeight / rows);
 
         const piecesArray: PuzzlePiece[] = [];
         let index = 0;
@@ -174,6 +193,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
     setElapsedTime(0);
     setScore(0);
     setCurrentScore(null);
+    setShowInstructions(false);
 
     startTimeRef.current = Date.now();
 
@@ -260,6 +280,11 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
     setCurrentScore(null);
   };
 
+  // Toggle instructions
+  const toggleInstructions = () => {
+    setShowInstructions(!showInstructions);
+  };
+
   // Render pieces in their current positions
   const renderPieces = () => {
     if (!imageLoaded) return null;
@@ -269,13 +294,18 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
       (a, b) => a.currentIndex - b.currentIndex
     );
 
+    // Calculate total grid dimensions
+    const firstPiece = sortedPieces[0];
+    if (!firstPiece) return null;
+
     return (
       <div
         className="grid gap-1 bg-gray-800"
         style={{
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          maxWidth: "90vw",
-          maxHeight: "70vh",
+          width: `${columns * firstPiece.width + (columns - 1)}px`,
+          maxWidth: "100%",
+          margin: "0 auto",
         }}
       >
         {sortedPieces.map((piece) => (
@@ -290,7 +320,8 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
             whileHover={{ scale: 0.98 }}
             whileTap={{ scale: 0.95 }}
             style={{
-              aspectRatio: "1/1",
+              width: `${piece.width}px`,
+              height: `${piece.height}px`,
             }}
           >
             {piece.img ? (
@@ -299,6 +330,10 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                 src={piece.img}
                 alt={`Puzzle piece ${piece.id}`}
                 className="w-full h-full object-cover"
+                style={{
+                  width: `${piece.width}px`,
+                  height: `${piece.height}px`,
+                }}
               />
             ) : (
               // Otherwise, use a div with the original image as background
@@ -309,8 +344,8 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                     backgroundImage: `url(${imageSrc})`,
                     backgroundPosition: `-${piece.x}px -${piece.y}px`,
                     backgroundSize: `${originalImage.width}px ${originalImage.height}px`,
-                    width: "100%",
-                    height: "100%",
+                    width: `${piece.width}px`,
+                    height: `${piece.height}px`,
                   }}
                 ></div>
               )
@@ -321,13 +356,54 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
     );
   };
 
+  // Game instructions
+  const renderInstructions = () => {
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-md mb-4 max-w-2xl mx-auto text-left">
+        <h3 className="text-xl font-bold mb-2">How to Play</h3>
+        <ol className="list-decimal pl-5 space-y-2">
+          <li>
+            The image is split into {rows}x{columns} pieces and shuffled
+            randomly.
+          </li>
+          <li>
+            <strong>To move pieces:</strong> Click on a piece to select it (it
+            will be highlighted with a yellow border), then click on another
+            piece to swap their positions.
+          </li>
+          <li>
+            Your goal is to rearrange the pieces to recreate the original image.
+          </li>
+          <li>
+            A timer starts when the game begins - the faster you solve the
+            puzzle, the higher your score!
+          </li>
+          <li>
+            When you complete the puzzle, you can submit your score to the
+            leaderboard.
+          </li>
+        </ol>
+        <div className="mt-4 pt-2 border-t border-gray-200">
+          <h4 className="font-bold">Scoring</h4>
+          <p>
+            Your score is calculated based on how quickly you solve the puzzle:
+          </p>
+          <ul className="list-disc pl-5">
+            <li>Base score: 1000 points</li>
+            <li>Time bonus: 10 points for each second under 5 minutes</li>
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center gap-6 p-4 min-h-[80vh]">
+    <div className="flex flex-col items-center justify-center gap-4 p-4 min-h-[80vh]">
       <canvas ref={canvasRef} className="hidden" />
 
       {!gameStarted ? (
         <div className="text-center">
-          <h1 className="text-3xl font-bold mb-6">Image Puzzle Challenge</h1>
+          <h1 className="text-3xl font-bold mb-4">Image Puzzle Challenge</h1>
           <p className="mb-4">
             Rearrange the pieces to complete the image. The faster you solve,
             the more points you get!
@@ -339,19 +415,39 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
           >
             {imageLoaded ? "Start Game" : "Loading Image..."}
           </button>
+          <div className="mt-2">
+            <button
+              onClick={toggleInstructions}
+              className="text-blue-600 underline text-sm"
+            >
+              {showInstructions ? "Hide Instructions" : "Show Instructions"}
+            </button>
+          </div>
+
+          {showInstructions && renderInstructions()}
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between w-full max-w-md mb-2">
+          <div className="flex items-center justify-between w-full max-w-xl mb-2">
             <div className="text-lg font-medium">
               Time: <span className="font-bold">{elapsedTime}s</span>
             </div>
+
+            <button
+              onClick={toggleInstructions}
+              className="text-sm text-blue-600 underline"
+            >
+              {showInstructions ? "Hide Help" : "Show Help"}
+            </button>
+
             {isComplete && (
               <div className="text-lg font-medium">
                 Score: <span className="font-bold text-green-600">{score}</span>
               </div>
             )}
           </div>
+
+          {showInstructions && renderInstructions()}
 
           {renderPieces()}
 
