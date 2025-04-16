@@ -71,28 +71,38 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Yozzle Leaderboard</h2>
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md w-full h-full">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center sm:text-left">
+        Yozzle Leaderboard
+      </h2>
 
       {isSubmitting && currentScore && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <h3 className="text-lg font-medium mb-2">Submit Your Score</h3>
-          <p className="mb-1">
-            Score: <span className="font-bold">{currentScore.score}</span>
-          </p>
-          <p className="mb-3">
-            Time: <span className="font-bold">{currentScore.time}s</span>
-          </p>
+        <div className="mb-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <h3 className="text-base sm:text-lg font-medium mb-2">
+            Submit Your Score
+          </h3>
+          <div className="flex flex-wrap justify-between mb-3">
+            <p className="mb-1 mr-4">
+              <span className="text-sm text-gray-600">Score:</span>{" "}
+              <span className="font-bold">{currentScore.score}</span>
+            </p>
+            <p className="mb-1">
+              <span className="text-sm text-gray-600">Time:</span>{" "}
+              <span className="font-bold">{currentScore.time}s</span>
+            </p>
+          </div>
 
           <form onSubmit={handleSubmitScore}>
             <label className="block mb-2">
-              Your Name:
+              <span className="text-sm font-medium text-gray-700">
+                Your Name:
+              </span>
               <input
                 type="text"
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 maxLength={20}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="mt-1 w-full p-2 border border-gray-300 rounded"
                 required
               />
             </label>
@@ -107,52 +117,82 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
       )}
 
       {scores.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rank
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Player
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Score
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Time
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Difficulty
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {scores.map((score, index) => (
-                <tr key={index} className={index < 3 ? "bg-yellow-50" : ""}>
-                  <td className="px-4 py-2 whitespace-nowrap">{index + 1}</td>
-                  <td className="px-4 py-2 whitespace-nowrap font-medium">
-                    {score.playerName}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap">{score.score}</td>
-                  <td className="px-4 py-2 whitespace-nowrap">{score.time}s</td>
-                  <td className="px-4 py-2 whitespace-nowrap">
-                    {score.difficulty}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap">
-                    {new Date(score.date).toLocaleDateString()}
-                  </td>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="inline-block min-w-full align-middle">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Rank
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Player
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Score
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell"
+                  >
+                    Time
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
+                  >
+                    Difficulty
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
+                  >
+                    Date
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {scores.map((score, index) => (
+                  <tr key={index} className={index < 3 ? "bg-yellow-50" : ""}>
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm">
+                      {index + 1}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm font-medium">
+                      {score.playerName}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm">
+                      {score.score}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm hidden sm:table-cell">
+                      {score.time}s
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm hidden md:table-cell">
+                      {score.difficulty}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-sm hidden md:table-cell">
+                      {new Date(score.date).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
-        <p className="text-gray-500 italic">No scores yet. Be the first to complete a Yozzle!</p>
+        <div className="text-center py-8">
+          <p className="text-gray-500 italic">
+            No scores yet. Be the first to complete a Yozzle!
+          </p>
+        </div>
       )}
     </div>
   );

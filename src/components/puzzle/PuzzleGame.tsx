@@ -16,6 +16,7 @@ interface PuzzleGameProps {
   imageSrc: string;
   rows: number;
   columns: number;
+  pieceSize?: "small" | "medium" | "large"; // Size option for fixed piece sizes
 }
 
 export interface Score {
@@ -26,10 +27,18 @@ export interface Score {
   date: string;
 }
 
+// Fixed piece size dimensions in pixels
+const PIECE_SIZES = {
+  small: { width: 60, height: 60 },
+  medium: { width: 80, height: 80 },
+  large: { width: 100, height: 100 },
+};
+
 const PuzzleGame: React.FC<PuzzleGameProps> = ({
   imageSrc = "/images/puz.jpg",
   rows = 3,
   columns = 3,
+  pieceSize = "medium",
 }) => {
   const [pieces, setPieces] = useState<PuzzlePiece[]>([]);
   const [isComplete, setIsComplete] = useState(false);
@@ -46,14 +55,21 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
   const [showPeek, setShowPeek] = useState(false);
   const [peekUsed, setPeekUsed] = useState(false);
   const [peekPenalty, setPeekPenalty] = useState(0);
+  const [currentPieceSize, setCurrentPieceSize] = useState(
+    PIECE_SIZES[pieceSize]
+  );
+  const gameContainerRef = useRef<HTMLDivElement>(null);
   const peekTimeout = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Fixed dimensions for puzzle
-  const PUZZLE_MAX_WIDTH = 600;
-  const PUZZLE_MAX_HEIGHT = 500;
+  // Update piece size when props change
+  useEffect(() => {
+    setCurrentPieceSize(PIECE_SIZES[pieceSize]);
+  }, [pieceSize]);
+
+  // Fixed dimensions for original puzzle image
   const PEEK_DURATION = 1500; // Duration in ms to show the solution
   const PEEK_PENALTY = 20; // Time penalty in seconds for using peek
 
@@ -76,26 +92,10 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // Calculate aspect ratio and resize while maintaining it
-        let newWidth = img.width;
-        let newHeight = img.height;
-
-        // Scale down if image is larger than max dimensions
-        if (newWidth > PUZZLE_MAX_WIDTH || newHeight > PUZZLE_MAX_HEIGHT) {
-          const widthRatio = PUZZLE_MAX_WIDTH / newWidth;
-          const heightRatio = PUZZLE_MAX_HEIGHT / newHeight;
-          const scaleFactor = Math.min(widthRatio, heightRatio);
-
-          newWidth = Math.floor(newWidth * scaleFactor);
-          newHeight = Math.floor(newHeight * scaleFactor);
-        }
-
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-
-        const pieceWidth = Math.floor(newWidth / columns);
-        const pieceHeight = Math.floor(newHeight / rows);
+        // Set canvas to the full image size
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
         const piecesArray: PuzzlePiece[] = [];
         let index = 0;
@@ -103,23 +103,28 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < columns; x++) {
             try {
+              // Calculate source dimensions from the original image
+              const srcWidth = Math.floor(img.width / columns);
+              const srcHeight = Math.floor(img.height / rows);
+
               // Create a new canvas for each piece
               const pieceCanvas = document.createElement("canvas");
-              pieceCanvas.width = pieceWidth;
-              pieceCanvas.height = pieceHeight;
+              pieceCanvas.width = currentPieceSize.width;
+              pieceCanvas.height = currentPieceSize.height;
               const pieceCtx = pieceCanvas.getContext("2d");
 
               if (pieceCtx) {
+                // Draw the image portion scaled to our fixed piece size
                 pieceCtx.drawImage(
                   canvas,
-                  x * pieceWidth,
-                  y * pieceHeight,
-                  pieceWidth,
-                  pieceHeight,
+                  x * srcWidth,
+                  y * srcHeight,
+                  srcWidth,
+                  srcHeight,
                   0,
                   0,
-                  pieceWidth,
-                  pieceHeight
+                  currentPieceSize.width,
+                  currentPieceSize.height
                 );
 
                 let pieceDataUrl = "";
@@ -138,10 +143,10 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                   correctIndex: index,
                   currentIndex: index,
                   img: pieceDataUrl,
-                  x: x * pieceWidth,
-                  y: y * pieceHeight,
-                  width: pieceWidth,
-                  height: pieceHeight,
+                  x: x * srcWidth,
+                  y: y * srcHeight,
+                  width: srcWidth, // Original dimensions for background positioning
+                  height: srcHeight,
                 });
               }
 
@@ -163,14 +168,14 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
     };
 
     img.src = imageSrc;
-  }, [imageSrc, rows, columns]);
+  }, [imageSrc, rows, columns, currentPieceSize]);
 
   // Reset game when configuration changes
   useEffect(() => {
     if (gameStarted) {
       startGame();
     }
-  }, [rows, columns, imageSrc]);
+  }, [rows, columns, imageSrc, pieceSize]);
 
   // Shuffle pieces
   const shufflePieces = () => {
@@ -326,12 +331,14 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
     }, PEEK_DURATION);
   };
 
+  // Handle piece size change
+  const handlePieceSizeChange = (size: "small" | "medium" | "large") => {
+    setCurrentPieceSize(PIECE_SIZES[size]);
+  };
+
   // Render the correct solution (for peek)
   const renderSolution = () => {
-    if (!imageLoaded || !originalImage) return null;
-
-    const firstPiece = pieces[0];
-    if (!firstPiece) return null;
+    if (!imageLoaded || !originalImage || pieces.length === 0) return null;
 
     return (
       <AnimatePresence>
@@ -348,8 +355,8 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                 src={imageSrc}
                 alt="Complete Yozzle"
                 style={{
-                  maxWidth: `${columns * firstPiece.width}px`,
-                  maxHeight: `${rows * firstPiece.height}px`,
+                  maxWidth: `${columns * currentPieceSize.width}px`,
+                  maxHeight: `${rows * currentPieceSize.height}px`,
                   objectFit: "contain",
                 }}
               />
@@ -362,27 +369,21 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
 
   // Render pieces in their current positions
   const renderPieces = () => {
-    if (!imageLoaded) return null;
+    if (!imageLoaded || pieces.length === 0) return null;
 
     // Sort pieces by current index for rendering
     const sortedPieces = [...pieces].sort(
       (a, b) => a.currentIndex - b.currentIndex
     );
 
-    // Calculate total grid dimensions
-    const firstPiece = sortedPieces[0];
-    if (!firstPiece) return null;
-
     return (
-      <div className="relative">
+      <div className="relative w-full flex justify-center overflow-auto">
         {renderSolution()}
         <div
           className="grid gap-1 bg-gray-800"
           style={{
             gridTemplateColumns: `repeat(${columns}, 1fr)`,
-            width: `${columns * firstPiece.width + (columns - 1)}px`,
-            maxWidth: "100%",
-            margin: "0 auto",
+            width: `${columns * currentPieceSize.width + (columns - 1)}px`,
           }}
         >
           {sortedPieces.map((piece) => (
@@ -397,8 +398,8 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
               whileHover={{ scale: 0.98 }}
               whileTap={{ scale: 0.95 }}
               style={{
-                width: `${piece.width}px`,
-                height: `${piece.height}px`,
+                width: `${currentPieceSize.width}px`,
+                height: `${currentPieceSize.height}px`,
               }}
             >
               {piece.img ? (
@@ -407,10 +408,6 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                   src={piece.img}
                   alt={`Yozzle piece ${piece.id}`}
                   className="w-full h-full object-cover"
-                  style={{
-                    width: `${piece.width}px`,
-                    height: `${piece.height}px`,
-                  }}
                 />
               ) : (
                 // Otherwise, use a div with the original image as background
@@ -419,10 +416,18 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
                     className="w-full h-full"
                     style={{
                       backgroundImage: `url(${imageSrc})`,
-                      backgroundPosition: `-${piece.x}px -${piece.y}px`,
-                      backgroundSize: `${originalImage.width}px ${originalImage.height}px`,
-                      width: `${piece.width}px`,
-                      height: `${piece.height}px`,
+                      backgroundPosition: `-${
+                        (piece.x / piece.width) * currentPieceSize.width
+                      }px -${
+                        (piece.y / piece.height) * currentPieceSize.height
+                      }px`,
+                      backgroundSize: `${
+                        (originalImage.width / pieces[0].width) *
+                        currentPieceSize.width
+                      }px ${
+                        (originalImage.height / pieces[0].height) *
+                        currentPieceSize.height
+                      }px`,
                     }}
                   ></div>
                 )
@@ -484,17 +489,66 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
     );
   };
 
+  // Size selector component
+  const renderSizeSelector = () => {
+    return (
+      <div className="flex items-center justify-center gap-3 mb-4">
+        <span className="text-sm font-medium">Piece Size:</span>
+        <div className="flex gap-1">
+          <button
+            onClick={() => handlePieceSizeChange("small")}
+            className={`px-2 py-1 text-xs rounded ${
+              currentPieceSize === PIECE_SIZES.small
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            }`}
+          >
+            Small
+          </button>
+          <button
+            onClick={() => handlePieceSizeChange("medium")}
+            className={`px-2 py-1 text-xs rounded ${
+              currentPieceSize === PIECE_SIZES.medium
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            }`}
+          >
+            Medium
+          </button>
+          <button
+            onClick={() => handlePieceSizeChange("large")}
+            className={`px-2 py-1 text-xs rounded ${
+              currentPieceSize === PIECE_SIZES.large
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            }`}
+          >
+            Large
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-4 min-h-[80vh]">
+    <div
+      className="flex flex-col items-center justify-center gap-4 p-4 min-h-[80vh] w-full"
+      ref={gameContainerRef}
+    >
       <canvas ref={canvasRef} className="hidden" />
 
       {!gameStarted ? (
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Yozzle Challenge</h1>
+        <div className="text-center w-full max-w-xl">
+          <h1 className="text-2xl md:text-3xl font-bold mb-4">
+            Yozzle Challenge
+          </h1>
           <p className="mb-4">
             Rearrange the pieces to complete the image. The faster you solve,
             the more points you get!
           </p>
+
+          {renderSizeSelector()}
+
           <button
             onClick={startGame}
             className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors"
@@ -515,7 +569,7 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between w-full max-w-xl mb-2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between w-full max-w-xl mb-2 gap-2">
             <div className="text-lg font-medium">
               Time: <span className="font-bold">{elapsedTime}s</span>
               {peekUsed && (
@@ -548,6 +602,8 @@ const PuzzleGame: React.FC<PuzzleGameProps> = ({
               </div>
             )}
           </div>
+
+          {!isComplete && renderSizeSelector()}
 
           {showInstructions && renderInstructions()}
 

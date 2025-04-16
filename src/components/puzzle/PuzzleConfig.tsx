@@ -5,10 +5,12 @@ interface PuzzleConfigProps {
     rows: number;
     columns: number;
     imageSrc: string;
+    pieceSize: "small" | "medium" | "large";
   }) => void;
   defaultRows?: number;
   defaultColumns?: number;
   defaultImageSrc?: string;
+  defaultPieceSize?: "small" | "medium" | "large";
 }
 
 const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
@@ -16,10 +18,14 @@ const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
   defaultRows = 3,
   defaultColumns = 3,
   defaultImageSrc = "/images/puz.jpg",
+  defaultPieceSize = "medium",
 }) => {
   const [rows, setRows] = useState(defaultRows);
   const [columns, setColumns] = useState(defaultColumns);
   const [imageSrc, setImageSrc] = useState(defaultImageSrc);
+  const [pieceSize, setPieceSize] = useState<"small" | "medium" | "large">(
+    defaultPieceSize
+  );
   const [customImageUrl, setCustomImageUrl] = useState("");
   const [showCorsWarning, setShowCorsWarning] = useState(false);
 
@@ -67,39 +73,85 @@ const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
       rows,
       columns,
       imageSrc,
+      pieceSize,
     });
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Yozzle Configuration</h2>
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md w-full max-w-lg mx-auto">
+      <h2 className="text-xl font-bold mb-4 text-center">
+        Yozzle Configuration
+      </h2>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Rows (2-8):
-          <input
-            type="number"
-            min="2"
-            max="8"
-            value={rows}
-            onChange={handleRowsChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          />
-        </label>
+      <div className="grid sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Rows (2-8):
+            <input
+              type="number"
+              min="2"
+              max="8"
+              value={rows}
+              onChange={handleRowsChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            />
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Columns (2-8):
+            <input
+              type="number"
+              min="2"
+              max="8"
+              value={columns}
+              onChange={handleColumnsChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            />
+          </label>
+        </div>
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Columns (2-8):
-          <input
-            type="number"
-            min="2"
-            max="8"
-            value={columns}
-            onChange={handleColumnsChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          />
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Piece Size:
         </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={`flex-1 py-2 px-3 rounded text-sm ${
+              pieceSize === "small"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
+            onClick={() => setPieceSize("small")}
+          >
+            Small
+          </button>
+          <button
+            type="button"
+            className={`flex-1 py-2 px-3 rounded text-sm ${
+              pieceSize === "medium"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
+            onClick={() => setPieceSize("medium")}
+          >
+            Medium
+          </button>
+          <button
+            type="button"
+            className={`flex-1 py-2 px-3 rounded text-sm ${
+              pieceSize === "large"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
+            onClick={() => setPieceSize("large")}
+          >
+            Large
+          </button>
+        </div>
       </div>
 
       <div className="mb-4">
@@ -123,7 +175,7 @@ const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
           ))}
         </div>
 
-        <form onSubmit={handleCustomImageSubmit} className="mt-2">
+        <form onSubmit={handleCustomImageSubmit} className="mt-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Custom Image URL:
             <input
@@ -134,12 +186,14 @@ const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
               placeholder="https://example.com/image.jpg"
             />
           </label>
-          <button
-            type="submit"
-            className="mt-1 px-2 py-1 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300"
-          >
-            Use Custom Image
-          </button>
+          <div className="mt-2 flex justify-end">
+            <button
+              type="submit"
+              className="px-3 py-1.5 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300"
+            >
+              Use Custom Image
+            </button>
+          </div>
 
           {showCorsWarning && (
             <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-xs">
@@ -154,12 +208,14 @@ const PuzzleConfig: React.FC<PuzzleConfigProps> = ({
         </form>
       </div>
 
-      <button
-        onClick={handleApplyConfig}
-        className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-      >
-        Apply Configuration
-      </button>
+      <div className="mt-6">
+        <button
+          onClick={handleApplyConfig}
+          className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Apply Configuration
+        </button>
+      </div>
     </div>
   );
 };

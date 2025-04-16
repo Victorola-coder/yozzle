@@ -69,19 +69,19 @@ export default function YozzlePage() {
   return (
     <>
       <SEO title="Yozzle - Image Puzzle Challenge" />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Yozzle Challenge</h1>
-          <div className="flex gap-2">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Yozzle Challenge</h1>
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={toggleLeaderboard}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              className="flex-1 sm:flex-none px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm sm:text-base"
             >
               {showLeaderboard ? "Hide Leaderboard" : "Leaderboard"}
             </button>
             <button
               onClick={() => setShowConfig(!showConfig)}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              className="flex-1 sm:flex-none px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors text-sm sm:text-base"
             >
               {showConfig ? "Hide Settings" : "Configure Yozzle"}
             </button>
@@ -89,6 +89,16 @@ export default function YozzlePage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* On mobile, the leaderboard can appear above the game if it's shown */}
+          {showLeaderboard && (
+            <div className="lg:hidden">
+              <Leaderboard
+                currentScore={currentScore}
+                onNewScore={handleNewScore}
+              />
+            </div>
+          )}
+
           <div
             className={`${showLeaderboard ? "lg:col-span-2" : "lg:col-span-3"}`}
           >
@@ -109,8 +119,9 @@ export default function YozzlePage() {
             )}
           </div>
 
+          {/* On desktop, the leaderboard appears to the right of the game */}
           {showLeaderboard && (
-            <div className="lg:col-span-1">
+            <div className="hidden lg:block lg:col-span-1">
               <Leaderboard
                 currentScore={currentScore}
                 onNewScore={handleNewScore}
